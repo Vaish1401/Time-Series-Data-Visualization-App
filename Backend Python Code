@@ -1,0 +1,65 @@
+from flask import Flask, jsonify, request
+import psycopg2
+
+app = Flask(__name__)
+
+# Database connection
+conn = psycopg2.connect(
+    dbname='your_db_name',
+    user='your_db_user',
+    password='your_db_password',
+    host='your_db_host',
+    port='your_db_port'
+)
+
+# Endpoint to fetch time-series data
+@app.route('/timeseries', methods=['GET'])
+def get_time_series():
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM time_series_data;')
+    rows = cursor.fetchall()
+    cursor.close()
+    return jsonify(rows)
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
+
+syntax = "proto3";
+
+service TimeSeriesService {
+    rpc GetData (GetDataRequest) returns (GetDataResponse);
+}
+
+message GetDataRequest {
+    // Add any necessary fields
+}
+
+message GetDataResponse {
+    repeated TimeSeriesData data = 1;
+}
+
+message TimeSeriesData {
+    // Define your time-series data structure here
+}
+
+pip install grpcio grpcio-tools
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. timeseries.proto
+
+import grpc
+import timeseries_pb2
+import timeseries_pb2_grpc
+
+class TimeSeriesServicer(timeseries_pb2_grpc.TimeSeriesServiceServicer):
+    def GetData(self, request, context):
+        # Implement logic to fetch and return time-series data
+        return timeseries_pb2.GetDataResponse()
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    timeseries_pb2_grpc.add_TimeSeriesServiceServicer_to_server(TimeSeriesServicer(), server)
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    server.wait_for_termination()
+
+if __name__ == '__main__':
+    serve()
