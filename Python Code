@@ -1,0 +1,18 @@
+import grpc
+import timeseries_pb2
+import timeseries_pb2_grpc
+
+class TimeSeriesServicer(timeseries_pb2_grpc.TimeSeriesServiceServicer):
+    def GetData(self, request, context):
+        # Implement logic to fetch and return time-series data
+        return timeseries_pb2.GetDataResponse()
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    timeseries_pb2_grpc.add_TimeSeriesServiceServicer_to_server(TimeSeriesServicer(), server)
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    server.wait_for_termination()
+
+if __name__ == '__main__':
+    serve()
