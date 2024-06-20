@@ -11,3 +11,9 @@ RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. timeserie
 COPY . .
 EXPOSE 5000
 CMD ["python", "app.py"]
+
+#Building and Running the Docker Container
+docker build -t timeseries-backend .
+
+#Run the Docker container:
+docker run -p 5000:5000 timeseries-backend
