@@ -1,0 +1,74 @@
+npx create-react-app frontend-app
+cd frontend-app
+
+npm install grpc-web highcharts highcharts-react-official
+
+import React, { useEffect, useState } from 'react';
+import { LineChart, Highcharts } from 'highcharts-react-official';
+import HighchartsExporting from 'highcharts/modules/exporting';
+import HighchartsOfflineExporting from 'highcharts/modules/offline-exporting';
+import { TimeseriesServiceClient } from './TimeseriesServiceClientPb';
+import { GetDataRequest } from './timeseries_pb';
+
+// Initialize Highcharts modules
+HighchartsExporting(Highcharts);
+HighchartsOfflineExporting(Highcharts);
+
+const client = new TimeseriesServiceClient('http://localhost:8080');
+
+function App() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const request = new GetDataRequest();
+        const response = await client.getData(request, {});
+        setData(response.getDataList());
+      } catch (error) {
+        console.error('Error fetching data:', error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const options = {
+    title: {
+      text: 'Time-Series Data'
+    },
+    series: [{
+      name: 'Value',
+      data: data.map(item => [item.getTimestamp(), item.getValue()]),
+    }],
+    xAxis: {
+      type: 'datetime',
+      title: {
+        text: 'Time'
+      }
+    },
+    yAxis: {
+      title: {
+        text: 'Value'
+      }
+    }
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Time-Series Data</h1>
+      </header>
+      <div className="chart-container">
+        <LineChart highcharts={Highcharts} options={options} />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+protoc -I=. timeseries.proto \
+  --js_out=import_style=commonjs:. \
+  --grpc-web_out=import_style=commonjs,mode=grpcwebtext:.
+
