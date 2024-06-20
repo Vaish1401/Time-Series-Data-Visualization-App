@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service TimeSeriesService {
+    rpc GetData (GetDataRequest) returns (GetDataResponse);
+}
+
+message GetDataRequest {
+    // Add any necessary fields
+}
+
+message GetDataResponse {
+    repeated TimeSeriesData data = 1;
+}
+
+message TimeSeriesData {
+    // Define your time-series data structure here
+}
